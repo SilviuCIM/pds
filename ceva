@@ -1,0 +1,163 @@
+[15/12, 10:17] +40 741 589 783: Fs = 44100; 
+nBits = 16; 
+nChannels = 2; 
+ID = -1;       % default audio input device 
+recObj = audiorecorder(Fs,nBits,nChannels,ID);
+disp("Begin speaking.")
+recDuration = 5; % record for 5 seconds
+recordblocking(recObj,recDuration);
+disp("End of recording.")
+play(recObj);
+[15/12, 10:21] +40 741 589 783: subplot(2, 4, 1);
+x = dtmf_encode_symbol('0', 320, 8000);
+X = abs(fft(x));
+w = 0:8000/320:319*8000/320;
+stem(w,X);
+axis([500 2000 0 160]);
+
+subplot(2, 4, 2);
+y = dtmf_encode_symbol('1', 320, 8000);
+Y = abs(fft(y));
+stem(w,Y);
+axis([500 2000 0 160]);
+
+subplot(2, 4, 3);
+l = dtmf_encode_symbol('2', 320, 8000);
+L = abs(fft(l));
+stem(w,L);
+axis([500 2000 0 160]);
+
+subplot(2, 4, 4);
+k = dtmf_encode_symbol('3', 320, 8000);
+K = abs(fft(k));
+stem(w,K);
+axis([500 2000 0 160]);
+
+subplot(2, 4, 5);
+t = dtmf_encode_symbol('4', 320, 8000);
+T = abs(fft(t));
+stem(w, T);
+axis([500 2000 0 160]);
+
+subplot(2, 4, 6);
+r = dtmf_encode_symbol('5', 320, 8000);
+R = abs(fft(r));
+stem(w, R);
+axis([500 2000 0 160]);
+
+subplot(2, 4, 7);
+e = dtmf_encode_symbol('6', 320, 8000);
+E = abs(fft(e));
+stem(w, E);
+axis([500 2000 0 160]);
+
+subplot(2, 4, 8);
+q = dtmf_encode_symbol('7', 320, 8000);
+Q = abs(fft(q));
+stem(w, Q);
+axis([500 2000 0 160]);
+
+xd = dtmf_decode_symbol(X, 8000);
+XD = abs(fft(xd));
+stem(w, XD);
+axis([500 2000 0 160]);
+[15/12, 10:22] +40 741 589 783: % DTMF_DECODE_SYMBOL - decodifică un simbol cu două tonuri de
+% frecvențe
+% x - semnalul conținând simbolul DTMF
+% fs - frecvența de eșantionare folosit la semnal
+% funcția returnează un caracter conținând simbolul detectat
+% un caracter gol dacă nu detectează nici un simbol respectiv
+% un caracter '!' dacă detectează prea multe tonuri
+function [s] = dtmf_decode_symbol(x, fs)
+symbols = ['1', '2', '3', 'A';
+'4', '5', '6', 'B';
+'7', '8', '9', 'C';
+'*', '0', '#', 'D'];
+freq1 = [697, 770, 852, 941];
+freq2 = [1209, 1336, 1477, 1633];
+X = abs(fft(x));
+f1 = X(round(freq1 * length(x) / fs) + 1);
+f2 = X(round(freq2 * length(x) / fs) + 1);
+r = find(f1 > length(x) / 4);
+c = find(f2 > length(x) / 4);
+if length(r) == 1 && length(c) == 1
+s = symbols(r,c);
+else if length(r) > 1 || length(c) > 1
+s = '!';
+else
+s = '';
+end
+end
+[15/12, 10:23] +40 741 589 783: function [X] = dtmf_encode_symbol(symbol, len, fs)
+symbols = ['1', '2', '3', 'A';
+'4', '5', '6', 'B';
+'7', '8', '9', 'C';
+'*', '0', '#', 'D'];
+freq1 = [697, 770, 852, 941];
+freq2 = [1209, 1336, 1477, 1633];
+% căutăm mai întâi simbolul din tabela de simboluri, pentru
+% a identifica frecvențele corespunzătoare
+[r,c] = find(symbols == symbol, 1);
+% dacă simbolul nu este găsit se emite un mesaj de eroare
+if isempty(r)
+error("Unknown symbol");
+end
+% altfel se generează semnalul cu suma a două sinusoide
+t = (0:len-1)/fs;
+X = sin(2 * pi * freq1(r) * t) + sin(2 * pi * freq2(c) * t);
+end
+[15/12, 10:37] +40 741 589 783: Fs = 44100; 
+nBits = 16; 
+nChannels = 2; 
+ID = -1;       % default audio input device 
+%recObj = audiorecorder(Fs,nBits,nChannels,ID);
+%disp("Begin speaking.")
+%recDuration = 5; % record for 5 seconds
+%recordblocking(recObj,recDuration);
+%disp("End of recording.")
+%play(recObj);
+
+s = dtmf_encode_symbol('2', 1500, 8000);
+S = abs(fft(s));
+%sunet = audioplayer(s,8000);
+%play(sunet);
+
+x = dtmf_encode_symbol('0', 1500, 8000);
+X = abs(fft(x));
+
+y = dtmf_encode_symbol('1', 1500, 8000);
+Y = abs(fft(y));
+
+l = dtmf_encode_symbol('2', 1500, 8000);
+L = abs(fft(l));
+
+k = dtmf_encode_symbol('3', 1500, 8000);
+K = abs(fft(k));
+
+t = dtmf_encode_symbol('4', 1500, 8000);
+T = abs(fft(t));
+
+r = dtmf_encode_symbol('5', 1500, 8000);
+R = abs(fft(r));
+
+e = dtmf_encode_symbol('6', 1500, 8000);
+E = abs(fft(e));
+
+q = dtmf_encode_symbol('7', 1500, 8000);
+Q = abs(fft(q));
+
+tr = [x, q, t, y, r, q, q, k, l, y];
+sunetul=audioplayer(tr,8000);
+play(sunetul);
+[15/12, 11:07] +40 741 589 783: Pt generare de ecou :  t = 0 : 1 / 8000 : 1;
+x = sin(2 * pi * 800 * t);
+a = audioplayer (x, 8000);
+r = audiorecorder (8000 , 8, 1);
+recordblocking (r, 5);
+x = getaudiodata (r);
+d = 3200;
+a = 0.6;
+y = [x(1:d); x(d + 1:end) + x(1:length(x)-d) * a];
+sr=y+x;
+a = audioplayer (sr, 8000);
+play(a);
